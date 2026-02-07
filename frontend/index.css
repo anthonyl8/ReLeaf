@@ -1,0 +1,5 @@
+/* ReLeaf - minimal base */
+html, body, #root {
+  margin: 0;
+  height: 100%;
+}
