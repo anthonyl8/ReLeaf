@@ -24,6 +24,7 @@ export default function Toolbar({
   onSpeciesChange,
   timeSliderVisible,
   onTimeSliderToggle,
+  embedded = false, // when true, no absolute positioning (inside sidebar)
 }) {
   // Radio button behavior: toggle off if clicking active layer
   const handleLayerClick = (layerId) => {
@@ -37,16 +38,7 @@ export default function Toolbar({
   const isIntervention = mode === "tree" || mode === "cool_roof" || mode === "bio_swale";
 
   return (
-    <div style={styles.container}>
-      {/* Brand */}
-      <div style={styles.brand}>
-        <span style={styles.logo}>🌿</span>
-        <div>
-          <span style={styles.brandName}>ReLeaf</span>
-          <span style={styles.tagline}>Heat Resilience</span>
-        </div>
-      </div>
-
+    <div style={{ ...styles.container, ...(embedded ? styles.containerEmbedded : {}) }}>
       {/* Mode */}
       <Section>
         <SectionLabel>MODE</SectionLabel>
@@ -249,8 +241,8 @@ function ActionBtn({ active, onClick, icon, label }) {
         ...styles.actionItemBtn,
         ...(active
           ? {
-              background: "rgba(59,130,246,0.12)",
-              color: "#60a5fa",
+              background: "rgba(74,222,128,0.15)",
+              color: "#4ade80",
             }
           : {}),
       }}
@@ -275,33 +267,11 @@ const styles = {
     maxHeight: "calc(100vh - 32px)",
     overflowY: "auto",
     overflowX: "hidden",
-    scrollbarWidth: "none",
   },
-  brand: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    background: "linear-gradient(135deg, rgba(20,35,30,0.95) 0%, rgba(26,40,35,0.95) 100%)",
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: "1px solid rgba(74,222,128,0.2)",
-    backdropFilter: "blur(16px)",
-    boxShadow: "0 2px 12px rgba(74,222,128,0.08)",
-  },
-  logo: { fontSize: "1.5rem" },
-  brandName: {
-    display: "block",
-    color: "#4ade80",
-    fontWeight: 800,
-    fontSize: "1.1rem",
-    lineHeight: 1.1,
-    letterSpacing: "-0.3px",
-  },
-  tagline: {
-    display: "block",
-    color: "#777",
-    fontSize: "0.6rem",
-    fontWeight: 500,
+  containerEmbedded: {
+    position: "static",
+    width: "100%",
+    maxHeight: "none",
   },
   section: {
     display: "flex",
