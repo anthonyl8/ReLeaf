@@ -18,7 +18,6 @@ import {
 import { LightingEffect, AmbientLight, _SunLight as SunLight } from "@deck.gl/core";
 import { getTemperature } from "../services/api";
 import { useHeatmapLayer } from "./HeatmapOverlay";
-import { useTreeLayers } from "./TreeLayer";
 
 const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || "";
 

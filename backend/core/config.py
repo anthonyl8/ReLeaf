@@ -11,12 +11,7 @@ _backend_dir = Path(__file__).resolve().parent.parent
 _env_path = _backend_dir / ".env"
 load_dotenv(_env_path)
 
-# Debug: print loaded keys (first 10 chars only) so you can verify
-_gm = os.getenv("GOOGLE_MAPS_API_KEY", "")
-_gai = os.getenv("GEMINI_API_KEY", "")
 print(f"[Config] .env path: {_env_path} (exists: {_env_path.exists()})")
-print(f"[Config] GOOGLE_MAPS_API_KEY: {'SET (' + _gm[:10] + '...)' if _gm else 'NOT SET'}")
-print(f"[Config] GEMINI_API_KEY: {'SET (' + _gai[:10] + '...)' if _gai else 'NOT SET'}")
 
 
 class Settings:

@@ -16,7 +16,6 @@ export default function Toolbar({
   simulationOpen,
   onROIToggle,
   roiOpen,
-  onVisionToggle,
   onReportDownload,
   activeDataLayer,
   onDataLayerChange,
@@ -166,11 +165,6 @@ export default function Toolbar({
           onClick={onTimeSliderToggle}
           icon="☀️"
           label="Sun Path"
-        />
-        <ActionBtn
-          onClick={onVisionToggle}
-          icon="📸"
-          label="Future Vision"
         />
         <ActionBtn
           onClick={onReportDownload}
