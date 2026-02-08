@@ -38,7 +38,12 @@ class ValidationService:
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.post(OVERPASS_URL, data={"data": query})
-                data = response.json()
+                if response.status_code != 200:
+                    raise Exception(f"Overpass API error: {response.status_code}")
+                try:
+                    data = response.json()
+                except ValueError:
+                    raise Exception("Invalid JSON from Overpass API")
 
             elements = data.get("elements", [])
 
@@ -67,7 +72,12 @@ class ValidationService:
 
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.post(OVERPASS_URL, data={"data": forbidden_query})
-                data = response.json()
+                if response.status_code != 200:
+                    raise Exception(f"Overpass API error: {response.status_code}")
+                try:
+                    data = response.json()
+                except ValueError:
+                    raise Exception("Invalid JSON from Overpass API")
 
             forbidden = data.get("elements", [])
 
@@ -128,7 +138,12 @@ class ValidationService:
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.post(OVERPASS_URL, data={"data": query})
-                data = response.json()
+                if response.status_code != 200:
+                    raise Exception(f"Overpass API error: {response.status_code}")
+                try:
+                    data = response.json()
+                except ValueError:
+                    raise Exception("Invalid JSON from Overpass API")
 
             elements = data.get("elements", [])
 
@@ -173,7 +188,12 @@ class ValidationService:
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.post(OVERPASS_URL, data={"data": query})
-                data = response.json()
+                if response.status_code != 200:
+                    raise Exception(f"Overpass API error: {response.status_code}")
+                try:
+                    data = response.json()
+                except ValueError:
+                    raise Exception("Invalid JSON from Overpass API")
 
             elements = data.get("elements", [])
 

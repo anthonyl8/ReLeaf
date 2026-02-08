@@ -1,21 +1,16 @@
 import { useEffect, useState } from "react";
-import { calculateROI, generateGrantProposal } from "../services/api";
+import { calculateROI } from "../services/api";
 
 /**
  * Cooling ROI (Return on Investment) Dashboard.
  * Shows real-time cost/benefit analysis as interventions are added.
  */
-export default function ROIPanel({ interventions, isOpen, onClose }) {
+export default function ROIPanel({ interventions, isOpen, onClose, onGenerateProposal, style = {} }) {
   const [roi, setRoi] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [grantLoading, setGrantLoading] = useState(false);
-  const [grantText, setGrantText] = useState(null);
 
   useEffect(() => {
-    if (!isOpen) {
-        setGrantText(null); // Reset grant when closed
-        return;
-    }
+    if (!isOpen) return;
     if (!interventions || interventions.length === 0) {
       setRoi(null);
       return;
@@ -28,22 +23,10 @@ export default function ROIPanel({ interventions, isOpen, onClose }) {
       .finally(() => setLoading(false));
   }, [isOpen, interventions]);
 
-  const handleGenerateGrant = async () => {
-    setGrantLoading(true);
-    try {
-      const result = await generateGrantProposal(interventions);
-      setGrantText(result.proposal);
-    } catch (err) {
-      console.error("Grant generation failed:", err);
-    } finally {
-      setGrantLoading(false);
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, ...style }}>
       <div style={styles.header}>
         <h3 style={styles.title}>💰 Cooling ROI Dashboard</h3>
         <button onClick={onClose} style={styles.closeBtn}>
@@ -169,32 +152,15 @@ export default function ROIPanel({ interventions, isOpen, onClose }) {
           {/* Grant Automator */}
           <div style={styles.grantSection}>
             <div style={styles.sectionTitle}>📝 Grant Automator</div>
-            {!grantText ? (
-              <button 
-                onClick={handleGenerateGrant} 
-                disabled={grantLoading}
-                style={styles.grantBtn}
-              >
-                {grantLoading ? "Writing Proposal..." : "Generate FEMA Grant Proposal"}
-              </button>
-            ) : (
-              <div style={styles.grantResult}>
-                <textarea 
-                  readOnly 
-                  value={grantText} 
-                  style={styles.grantTextarea}
-                />
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(grantText);
-                    alert("Copied to clipboard!");
-                  }}
-                  style={styles.copyBtn}
-                >
-                  Copy to Clipboard
-                </button>
-              </div>
-            )}
+            <button 
+              onClick={onGenerateProposal} 
+              style={styles.grantBtn}
+            >
+              Generate FEMA Grant Proposal
+            </button>
+            <p style={{ fontSize: "0.7rem", color: "#888", marginTop: "4px" }}>
+              Opens a new card with the full proposal.
+            </p>
           </div>
         </div>
       )}
@@ -257,13 +223,15 @@ const styles = {
     bottom: "16px",
     right: "16px",
     width: "360px",
+    maxHeight: "85vh", // Prevent cutoff on small screens
+    overflowY: "auto", // Enable scrolling
     background: "linear-gradient(135deg, rgba(20,35,30,0.97) 0%, rgba(26,40,35,0.97) 100%)",
     borderRadius: "14px",
     border: "1px solid rgba(74,222,128,0.2)",
     backdropFilter: "blur(12px)",
     zIndex: 100,
-    overflow: "hidden",
     boxShadow: "0 8px 32px rgba(74,222,128,0.15)",
+    scrollbarWidth: "none", // Hide scrollbar for cleaner look
   },
   header: {
     display: "flex",

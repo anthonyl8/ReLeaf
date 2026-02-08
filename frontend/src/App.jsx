@@ -11,6 +11,7 @@ import ROIPanel from "./components/ROIPanel";
 import ValidationToast from "./components/ValidationToast";
 import HeatmapLegend from "./components/HeatmapLegend";
 import InfoCard from "./components/InfoCard";
+import GrantProposalCard from "./components/GrantProposalCard";
 import { useTreePlanting } from "./hooks/useTreePlanting";
 import {
   getHotspots,
@@ -19,6 +20,7 @@ import {
   getEquityData,
   simulateCoolingV2,
   validateLocation,
+  generateGrantProposal,
 } from "./services/api";
 import "./App.css";
 
@@ -61,6 +63,10 @@ function App() {
 
   // Selected item for info card
   const [selectedItem, setSelectedItem] = useState(null);
+
+  // Grant Proposal State
+  const [grantProposalOpen, setGrantProposalOpen] = useState(false);
+  const [proposalText, setProposalText] = useState("");
 
   // Hover & Validation State (Minecraft-style placement)
   const [hoverLocation, setHoverLocation] = useState(null);
@@ -357,6 +363,28 @@ function App() {
     setSelectedItem(item);
   }, []);
 
+  const handleGrantProposal = useCallback(async () => {
+    try {
+      showToast("Generating proposal... (this may take a moment)", "info");
+      
+      const allInterventions = [
+        ...trees.map(t => ({ ...t, type: "tree" })),
+        ...coolRoofs.map(r => ({ ...r, type: "cool_roof" })),
+        ...bioSwales.map(b => ({ ...b, type: "bio_swale" }))
+      ];
+      
+      const res = await generateGrantProposal(allInterventions);
+      if (res && res.proposal) {
+        setProposalText(res.proposal);
+        setGrantProposalOpen(true);
+        showToast("Proposal generated successfully!", "info");
+      }
+    } catch (err) {
+      console.error("Grant generation failed:", err);
+      showToast("Failed to generate proposal", "error");
+    }
+  }, [trees, coolRoofs, bioSwales, showToast]);
+
   const handleReportDownload = useCallback(() => {
     // Generate a printable report
     const s = simulation;
@@ -521,12 +549,6 @@ function App() {
         {/* Search Bar — top center */}
         <SearchBar onPlaceSelect={handlePlaceSelect} />
 
-        {/* Heat Map Legend — top right */}
-        <HeatmapLegend 
-          activeLayer={activeDataLayer} 
-          onInfoClick={handleItemClick}
-        />
-
         {/* Toolbar — left side */}
         <Toolbar
           mode={mode}
@@ -537,15 +559,16 @@ function App() {
           onClear={clearTrees}
           onSimulationToggle={() => {
             setSimulationOpen((v) => !v);
-            setRoiOpen(false);
+            setRoiOpen(false); // Mutually exclusive
           }}
           simulationOpen={simulationOpen}
           onROIToggle={() => {
             setRoiOpen((v) => !v);
-            setSimulationOpen(false);
+            setSimulationOpen(false); // Mutually exclusive
           }}
           roiOpen={roiOpen}
           onReportDownload={handleReportDownload}
+          onGenerateProposal={handleGrantProposal}
           activeDataLayer={activeDataLayer}
           onDataLayerChange={setActiveDataLayer}
           selectedSpecies={selectedSpecies}
@@ -570,20 +593,63 @@ function App() {
           />
         )}
 
-        {/* Simulation Panel — bottom right */}
-        <SimulationPanel
-          simulation={simulation}
-          isOpen={simulationOpen}
-          onClose={() => setSimulationOpen(false)}
-          interventionCount={interventionCount}
-        />
+        {/* Right Side Column (Legend + ROI/Simulation) */}
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            bottom: "16px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            pointerEvents: "none",
+            zIndex: 1000,
+          }}
+        >
+          {/* Heat Map Legend — top right */}
+          <div style={{ pointerEvents: "auto", marginBottom: "16px" }}>
+            <HeatmapLegend
+              activeLayer={activeDataLayer}
+              onInfoClick={handleItemClick}
+              style={{ position: "static" }}
+            />
+          </div>
 
-        {/* ROI Dashboard — bottom right */}
-        <ROIPanel
-          interventions={interventions}
-          isOpen={roiOpen}
-          onClose={() => setRoiOpen(false)}
-        />
+          {/* ROI Dashboard — Resizes to fill space */}
+          {roiOpen && (
+            <ROIPanel
+              interventions={interventions}
+              isOpen={roiOpen}
+              onClose={() => setRoiOpen(false)}
+              onGenerateProposal={handleGrantProposal}
+              style={{
+                position: "static",
+                width: "360px",
+                height: "100%",
+                maxHeight: "none",
+                pointerEvents: "auto",
+                flex: "1 1 auto",
+                minHeight: 0,
+              }}
+            />
+          )}
+
+          {/* Simulation Panel — Stays at bottom, auto height */}
+          {simulationOpen && (
+            <SimulationPanel
+              simulation={simulation}
+              isOpen={simulationOpen}
+              onClose={() => setSimulationOpen(false)}
+              interventionCount={interventionCount}
+              style={{
+                position: "static",
+                marginTop: "auto",
+                pointerEvents: "auto",
+              }}
+            />
+          )}
+        </div>
 
         {/* Street View Panel */}
         <StreetViewPanel
@@ -611,6 +677,13 @@ function App() {
 
         {/* Info Card */}
         <InfoCard item={selectedItem} onClose={() => setSelectedItem(null)} />
+
+        {/* Grant Proposal Card */}
+        <GrantProposalCard 
+          isOpen={grantProposalOpen} 
+          onClose={() => setGrantProposalOpen(false)} 
+          proposal={proposalText} 
+        />
       </div>
     </APIProvider>
   );
