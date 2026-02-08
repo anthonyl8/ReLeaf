@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import MapView from "./components/MapView";
 import SearchBar from "./components/SearchBar";
-import Toolbar from "./components/Toolbar";
 import SimulationPanel from "./components/SimulationPanel";
 import StatsPanel from "./components/StatsPanel";
 import StreetViewPanel from "./components/StreetViewPanel";
@@ -12,6 +11,10 @@ import ValidationToast from "./components/ValidationToast";
 import HeatmapLegend from "./components/HeatmapLegend";
 import InfoCard from "./components/InfoCard";
 import GrantProposalCard from "./components/GrantProposalCard";
+import HeaderBar from "./components/HeaderBar";
+import AlertBar from "./components/AlertBar";
+import SidebarPanel from "./components/SidebarPanel";
+import HeatRiskZonesPanel from "./components/HeatRiskZonesPanel";
 import { useTreePlanting } from "./hooks/useTreePlanting";
 import {
   getHotspots,
@@ -67,6 +70,10 @@ function App() {
   // Grant Proposal State
   const [grantProposalOpen, setGrantProposalOpen] = useState(false);
   const [proposalText, setProposalText] = useState("");
+
+  // Unified Navigation State
+  const [activeTab, setActiveTab] = useState("overview");
+  const [alertDismissed, setAlertDismissed] = useState(false);
 
   // Hover & Validation State (Minecraft-style placement)
   const [hoverLocation, setHoverLocation] = useState(null);
@@ -347,6 +354,27 @@ function App() {
     mapRef.current?.flyTo(place.lat, place.lng, 16);
   }, []);
 
+  // ─── Tab Logic ─────────────────────────────────────────────
+
+  const handleTabChange = useCallback((tabId) => {
+    setActiveTab(tabId);
+    
+    // Auto-configure view based on tab
+    if (tabId === "overview") {
+      setActiveDataLayer("hotspots"); // Show hotspots by default in overview
+      setRoiOpen(false);
+      setSimulationOpen(false);
+    } else if (tabId === "heatmap") {
+      setActiveDataLayer("heatmap");
+      setRoiOpen(false);
+      setSimulationOpen(false);
+    } else if (tabId === "carbon") {
+      setActiveDataLayer("equity"); // Show equity/income correlation
+      setRoiOpen(true);
+      setSimulationOpen(false);
+    }
+  }, []);
+
   const handleTimeSliderToggle = useCallback(() => {
     setTimeSliderVisible((v) => {
       const next = !v;
@@ -512,101 +540,129 @@ function App() {
     );
   }
 
+  // Show LeftPanel primarily in Overview mode, but keep it available if user toggles hotspots manually
+  const showLeftPanel = activeTab === "overview" || activeDataLayer === "hotspots";
+
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
       <div style={styles.app}>
-        {/* Google Maps 3D */}
-        <MapView
-          ref={mapRef}
-          mode={mode}
-          trees={trees}
-          interventions={interventions}
-          coolRoofs={coolRoofs}
-          bioSwales={bioSwales}
-          selectedSpecies={selectedSpecies}
-          onTreePlant={handleTreePlant}
-          onCoolRoofPlace={handleCoolRoofPlace}
-          onBioSwalePlace={handleBioSwalePlace}
-          onMapClick={handleMapClick}
-          onTemperatureUpdate={handleTemperatureUpdate}
-          heatmapVisible={activeDataLayer === "heatmap"}
-          hotspotsVisible={activeDataLayer === "hotspots"}
-          suggestionsVisible={activeDataLayer === "suggestions"}
-          vulnerabilityVisible={activeDataLayer === "vulnerability"}
-          equityVisible={activeDataLayer === "equity"}
+        {/* Header with Integrated Navigation & Search */}
+        <HeaderBar 
+          activeTab={activeTab} 
+          onTabChange={handleTabChange} 
+          onPlaceSelect={handlePlaceSelect}
+        />
+        
+        <AlertBar
           hotspots={hotspots}
-          suggestions={suggestions}
-          vulnerabilityData={vulnerabilityData}
-          equityData={equityData}
-          timeOfDay={timeOfDay}
-          onItemClick={handleItemClick}
-          // New Props for Ghost/Validation
-          hoverLocation={hoverLocation}
-          validationStatus={validationStatus}
-          onHover={handleHover}
+          dismissed={alertDismissed}
+          onDismiss={() => setAlertDismissed(true)}
         />
 
-        {/* Search Bar — top center */}
-        <SearchBar onPlaceSelect={handlePlaceSelect} />
-
-        {/* Toolbar — left side */}
-        <Toolbar
-          mode={mode}
-          onModeChange={setMode}
-          treeCount={treeCount}
-          interventionCount={interventionCount}
-          onUndo={removeLastTree}
-          onClear={clearTrees}
-          onSimulationToggle={() => {
-            setSimulationOpen((v) => !v);
-            setRoiOpen(false); // Mutually exclusive
-          }}
-          simulationOpen={simulationOpen}
-          onROIToggle={() => {
-            setRoiOpen((v) => !v);
-            setSimulationOpen(false); // Mutually exclusive
-          }}
-          roiOpen={roiOpen}
-          onReportDownload={handleReportDownload}
-          onGenerateProposal={handleGrantProposal}
-          activeDataLayer={activeDataLayer}
-          onDataLayerChange={setActiveDataLayer}
-          selectedSpecies={selectedSpecies}
-          onSpeciesChange={setSelectedSpecies}
-          timeSliderVisible={timeSliderVisible}
-          onTimeSliderToggle={handleTimeSliderToggle}
-        />
-
-        {/* Bottom Stats */}
-        <StatsPanel
-          temperature={temperature}
-          treeCount={treeCount}
-          interventionCount={interventionCount}
-          simulation={simulation}
-        />
-
-        {/* Sun Path Slider */}
-        {timeSliderVisible && (
-          <TimeSlider
-            timeOfDay={timeOfDay || 13}
-            onTimeChange={setTimeOfDay}
+        {/* Main content area */}
+        <div style={styles.mainContent}>
+          {/* Unified sidebar: data + tools, collapsible, scrollable */}
+          <SidebarPanel
+            hotspots={hotspots}
+            simulation={simulation}
+            showDataPanels={showLeftPanel}
+            mode={mode}
+            onModeChange={setMode}
+            treeCount={treeCount}
+            interventionCount={interventionCount}
+            onUndo={removeLastTree}
+            onClear={clearTrees}
+            onSimulationToggle={() => {
+              setSimulationOpen((v) => !v);
+              setRoiOpen(false);
+            }}
+            simulationOpen={simulationOpen}
+            onROIToggle={() => {
+              setRoiOpen((v) => !v);
+              setSimulationOpen(false);
+            }}
+            roiOpen={roiOpen}
+            onReportDownload={handleReportDownload}
+            onGenerateProposal={handleGrantProposal}
+            activeDataLayer={activeDataLayer}
+            onDataLayerChange={setActiveDataLayer}
+            selectedSpecies={selectedSpecies}
+            onSpeciesChange={setSelectedSpecies}
+            timeSliderVisible={timeSliderVisible}
+            onTimeSliderToggle={handleTimeSliderToggle}
           />
-        )}
 
-        {/* Right Side Column (Legend + ROI/Simulation) */}
-        <div
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            bottom: "16px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            pointerEvents: "none",
-            zIndex: 1000,
-          }}
-        >
+          {/* Map + overlays */}
+          <div style={styles.mapArea}>
+            <MapView
+              ref={mapRef}
+              mode={mode}
+              trees={trees}
+              interventions={interventions}
+              coolRoofs={coolRoofs}
+              bioSwales={bioSwales}
+              selectedSpecies={selectedSpecies}
+              onTreePlant={handleTreePlant}
+              onCoolRoofPlace={handleCoolRoofPlace}
+              onBioSwalePlace={handleBioSwalePlace}
+              onMapClick={handleMapClick}
+              onTemperatureUpdate={handleTemperatureUpdate}
+              heatmapVisible={activeDataLayer === "heatmap"}
+              hotspotsVisible={activeDataLayer === "hotspots"}
+              suggestionsVisible={activeDataLayer === "suggestions"}
+              vulnerabilityVisible={activeDataLayer === "vulnerability"}
+              equityVisible={activeDataLayer === "equity"}
+              hotspots={hotspots}
+              suggestions={suggestions}
+              vulnerabilityData={vulnerabilityData}
+              equityData={equityData}
+              timeOfDay={timeOfDay}
+              onItemClick={handleItemClick}
+              hoverLocation={hoverLocation}
+              validationStatus={validationStatus}
+              onHover={handleHover}
+            />
+
+            {/* Bottom Stats — when sidebar collapsed or no data panels */}
+            {!showLeftPanel && (
+              <StatsPanel
+                temperature={temperature}
+                treeCount={treeCount}
+                interventionCount={interventionCount}
+                simulation={simulation}
+              />
+            )}
+
+            {/* Sun Path Slider */}
+            {timeSliderVisible && (
+              <TimeSlider
+                timeOfDay={timeOfDay || 13}
+                onTimeChange={setTimeOfDay}
+              />
+            )}
+
+            {/* Right Side Column (Heat Risk Zones + Legend + ROI/Simulation) */}
+            <div
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                bottom: "16px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+                pointerEvents: "none",
+                zIndex: 1000,
+                overflowY: "auto",
+              }}
+            >
+          {/* Heat Risk Zones — Only on Overview/Hotspots */}
+          {(activeTab === "overview" || activeDataLayer === "hotspots") && (
+            <div style={{ pointerEvents: "auto", marginBottom: "16px" }}>
+              <HeatRiskZonesPanel hotspots={hotspots} />
+            </div>
+          )}
+
           {/* Heat Map Legend — top right */}
           <div style={{ pointerEvents: "auto", marginBottom: "16px" }}>
             <HeatmapLegend
@@ -649,6 +705,8 @@ function App() {
               }}
             />
           )}
+        </div>
+        </div>
         </div>
 
         {/* Street View Panel */}
@@ -693,10 +751,27 @@ const styles = {
   app: {
     width: "100vw",
     height: "100vh",
-    position: "relative",
+    display: "flex",
+    flexDirection: "column",
     overflow: "hidden",
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  mainContent: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "row",
+    minHeight: 0,
+    position: "relative",
+  },
+  leftPanel: {
+    padding: "16px 0 16px 16px",
+    overflowY: "auto",
+  },
+  mapArea: {
+    flex: 1,
+    position: "relative",
+    minWidth: 0,
   },
   setupScreen: {
     width: "100vw",
