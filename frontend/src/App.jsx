@@ -8,7 +8,6 @@ import StatsPanel from "./components/StatsPanel";
 import StreetViewPanel from "./components/StreetViewPanel";
 import TimeSlider from "./components/TimeSlider";
 import ROIPanel from "./components/ROIPanel";
-import FutureVision from "./components/FutureVision";
 import ValidationToast from "./components/ValidationToast";
 import HeatmapLegend from "./components/HeatmapLegend";
 import InfoCard from "./components/InfoCard";
@@ -53,9 +52,6 @@ function App() {
 
   // ROI panel
   const [roiOpen, setRoiOpen] = useState(false);
-
-  // Future Vision
-  const [visionOpen, setVisionOpen] = useState(false);
 
   // Validation toast
   const [validationMessage, setValidationMessage] = useState(null);
@@ -462,7 +458,6 @@ function App() {
             setSimulationOpen(false);
           }}
           roiOpen={roiOpen}
-          onVisionToggle={() => setVisionOpen(true)}
           onReportDownload={handleReportDownload}
           activeDataLayer={activeDataLayer}
           onDataLayerChange={setActiveDataLayer}
@@ -517,14 +512,6 @@ function App() {
             suggestions,
             vulnerability: vulnerabilityData,
           }}
-        />
-
-        {/* Future Vision — Gemini AI */}
-        <FutureVision
-          isOpen={visionOpen}
-          onClose={() => setVisionOpen(false)}
-          viewport={mapRef.current?.getViewport?.()}
-          treeCount={treeCount}
         />
 
         {/* Validation Toast */}

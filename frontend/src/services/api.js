@@ -116,6 +116,25 @@ export async function calculateROI(interventions) {
   return res.json();
 }
 
+// ─── Street View AI ──────────────────────────────────────────────
+
+/**
+ * Transform a Street View image by compositing planted trees at exact coordinates.
+ * Only modifies the image to show the specific trees planted, nothing else.
+ */
+export async function transformStreetView(lat, lng, heading, pitch, fov = 90, trees = []) {
+  const res = await fetch(`${API_URL}/streetview-ai/transform`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lat, lng, heading, pitch, fov, trees }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to transform Street View");
+  }
+  return res.json();
+}
+
 // ─── Validation ───────────────────────────────────────────────
 
 export async function validateLocation(type, lat, lon) {
@@ -128,31 +147,3 @@ export async function validateLocation(type, lat, lon) {
   return res.json();
 }
 
-// ─── Vision ───────────────────────────────────────────────────
-
-/**
- * Generate AI vision. Sends viewport info to backend, which fetches
- * the satellite image and generates the AI-modified version.
- */
-export async function generateVision(
-  centerLat,
-  centerLng,
-  zoom,
-  treeCount = 0
-) {
-  const res = await fetch(`${API_URL}/vision/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      center_lat: centerLat,
-      center_lon: centerLng,
-      zoom: Math.round(zoom),
-      tree_count: treeCount,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to generate vision");
-  }
-  return res.json();
-}
