@@ -340,7 +340,7 @@ const styles = {
     borderRadius: "16px",
     padding: "20px",
     boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(74,222,128,0.1)",
-    zIndex: 100,
+    zIndex: 200, // Above legend (150)
     color: "#e5e5e5",
     overflowY: "auto",
   },
@@ -348,8 +348,8 @@ const styles = {
     position: "absolute",
     top: "12px",
     right: "12px",
-    background: "rgba(255,255,255,0.1)",
-    border: "1px solid rgba(255,255,255,0.2)",
+    background: "rgba(239,68,68,0.2)", // Slight red tint for visibility
+    border: "1px solid rgba(239,68,68,0.4)",
     borderRadius: "8px",
     width: "32px",
     height: "32px",

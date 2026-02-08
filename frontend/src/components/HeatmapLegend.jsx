@@ -4,14 +4,14 @@ import React from "react";
  * Map Legend - Shows legends for different active data layers.
  * Supports: Heatmap, Hotspots (Red Zones), Suggestions, Vulnerability.
  */
-export default function HeatmapLegend({ activeLayer, onInfoClick }) {
+export default function HeatmapLegend({ activeLayer, onInfoClick, style = {} }) {
   if (!activeLayer) return null;
 
   const config = getLegendConfig(activeLayer);
   if (!config) return null;
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, ...style }}>
       <div style={styles.header}>
         <span style={styles.icon}>{config.icon}</span>
         <span style={styles.title}>{config.title}</span>
@@ -145,6 +145,33 @@ function getLegendConfig(layer) {
             color: "rgba(100, 180, 255, 0.6)",
             border: "2px solid rgb(150, 210, 255)",
             shape: "circle" 
+          },
+        ],
+      };
+
+    case "equity":
+      return {
+        title: "Equity (Income Zones)",
+        icon: "📊",
+        source: "Census & Income Data",
+        items: [
+          { 
+            label: "Low Income (<$40k)", 
+            desc: "High heat exposure risk", 
+            color: "rgba(255, 0, 0, 0.6)",
+            border: "1px solid rgb(255, 100, 100)",
+          },
+          { 
+            label: "Middle Income", 
+            desc: "$40k - $70k", 
+            color: "rgba(255, 165, 0, 0.6)",
+            border: "1px solid rgb(255, 200, 100)",
+          },
+          { 
+            label: "High Income (>$70k)", 
+            desc: "Lower heat exposure", 
+            color: "rgba(0, 255, 0, 0.6)",
+            border: "1px solid rgb(100, 255, 100)",
           },
         ],
       };

@@ -2,14 +2,14 @@
  * Before/After simulation panel that shows the cooling impact of all interventions.
  * Appears at the bottom-right of the screen.
  */
-export default function SimulationPanel({ simulation, isOpen, onClose, interventionCount = 0 }) {
+export default function SimulationPanel({ simulation, isOpen, onClose, interventionCount = 0, style = {} }) {
   if (!isOpen) return null;
 
   const isEmpty = interventionCount === 0;
   const isLoading = !isEmpty && !simulation;
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, ...style }}>
       <div style={styles.header}>
         <h3 style={styles.title}>Before / After Simulation</h3>
         <button onClick={onClose} style={styles.closeBtn}>
@@ -150,8 +150,10 @@ const styles = {
     border: "1px solid rgba(74,222,128,0.2)",
     backdropFilter: "blur(12px)",
     zIndex: 100,
-    overflow: "hidden",
+    overflowY: "auto", // Enable vertical scrolling
+    overflowX: "hidden",
     boxShadow: "0 8px 32px rgba(74,222,128,0.15)",
+    scrollbarWidth: "none",
   },
   header: {
     display: "flex",

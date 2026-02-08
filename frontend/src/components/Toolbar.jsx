@@ -17,6 +17,7 @@ export default function Toolbar({
   onROIToggle,
   roiOpen,
   onReportDownload,
+  onGenerateProposal,
   activeDataLayer,
   onDataLayerChange,
   selectedSpecies,
