@@ -11,6 +11,7 @@ import ROIPanel from "./components/ROIPanel";
 import FutureVision from "./components/FutureVision";
 import ValidationToast from "./components/ValidationToast";
 import HeatmapLegend from "./components/HeatmapLegend";
+import InfoCard from "./components/InfoCard";
 import { useTreePlanting } from "./hooks/useTreePlanting";
 import {
   getHotspots,
@@ -59,6 +60,9 @@ function App() {
   // Validation toast
   const [validationMessage, setValidationMessage] = useState(null);
   const [validationType, setValidationType] = useState("warning");
+
+  // Selected item for info card
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const {
     interventions,
@@ -272,6 +276,10 @@ function App() {
     });
   }, []);
 
+  const handleItemClick = useCallback((item) => {
+    setSelectedItem(item);
+  }, []);
+
   const handleReportDownload = useCallback(() => {
     // Generate a printable report
     const s = simulation;
@@ -424,13 +432,17 @@ function App() {
           suggestions={suggestions}
           vulnerabilityData={vulnerabilityData}
           timeOfDay={timeOfDay}
+          onItemClick={handleItemClick}
         />
 
         {/* Search Bar — top center */}
         <SearchBar onPlaceSelect={handlePlaceSelect} />
 
         {/* Heat Map Legend — top right */}
-        <HeatmapLegend visible={activeDataLayer === "heatmap"} />
+        <HeatmapLegend 
+          visible={activeDataLayer === "heatmap"} 
+          onInfoClick={handleItemClick}
+        />
 
         {/* Toolbar — left side */}
         <Toolbar
@@ -521,6 +533,9 @@ function App() {
           type={validationType}
           onClose={() => setValidationMessage(null)}
         />
+
+        {/* Info Card */}
+        <InfoCard item={selectedItem} onClose={() => setSelectedItem(null)} />
       </div>
     </APIProvider>
   );
