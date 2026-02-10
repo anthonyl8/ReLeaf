@@ -8,6 +8,7 @@ import TimeSlider from "./components/TimeSlider";
 import ROIPanel from "./components/ROIPanel";
 import ValidationToast from "./components/ValidationToast";
 import HeatmapLegend from "./components/HeatmapLegend";
+import AirQualityLegend from "./components/AirQualityLegend";
 import InfoCard from "./components/InfoCard";
 import GrantProposalCard from "./components/GrantProposalCard";
 import HeaderBar from "./components/HeaderBar";
@@ -817,6 +818,7 @@ function App() {
               suggestionsVisible={activeDataLayer === "suggestions"}
               vulnerabilityVisible={activeDataLayer === "vulnerability"}
               equityVisible={activeDataLayer === "equity"}
+              airQualityVisible={activeDataLayer === "air_quality"}
               hotspots={hotspots}
               suggestions={suggestions}
               vulnerabilityData={vulnerabilityData}
@@ -854,6 +856,10 @@ function App() {
               activeLayer={activeDataLayer}
               onInfoClick={handleItemClick}
               style={{ position: "static" }}
+            />
+            <AirQualityLegend
+              visible={activeDataLayer === "air_quality"}
+              treeCount={treeCount}
             />
           </div>
         </div>

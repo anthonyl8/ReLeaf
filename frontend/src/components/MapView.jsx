@@ -18,6 +18,7 @@ import {
 import { LightingEffect, AmbientLight, _SunLight as SunLight } from "@deck.gl/core";
 import { getTemperature } from "../services/api";
 import { useHeatmapLayer } from "./HeatmapOverlay";
+import AirQualityOverlay from "./AirQualityOverlay";
 import "./MapView.css";
 
 const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || "";
@@ -100,6 +101,7 @@ const MapView = forwardRef(function MapView(
     vulnerabilityVisible,
     equityData,
     equityVisible,
+    airQualityVisible,
     timeOfDay,
     onItemClick,
     hoverLocation,
@@ -766,6 +768,7 @@ const MapView = forwardRef(function MapView(
       >
         <MapInstanceCapture onMapReady={setMapInstance} />
         <DeckGLOverlay layers={allLayers} effects={lightingEffects} />
+        <AirQualityOverlay visible={airQualityVisible} />
       </Map>
 
       {/* Mode indicators */}

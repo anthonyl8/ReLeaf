@@ -143,6 +143,12 @@ export default function Toolbar({
           color="#60a5fa"
           label="Equity (Income)"
         />
+        <RadioLayerToggle
+          active={activeDataLayer === "air_quality"}
+          onClick={() => handleLayerClick("air_quality")}
+          color="#34d399"
+          label="Air Quality"
+        />
       </Section>
 
       {/* Dashboard & Tools */}
