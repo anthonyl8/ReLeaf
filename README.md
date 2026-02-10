@@ -28,7 +28,7 @@ ReLeaf is a smart urban planning tool designed to help cities and communities co
 ## Project Structure
 
 ```
-htc-2026/
+ReLeaf/
 ├── backend/
 │   ├── controllers/        # API route handlers
 │   │   ├── heatmap.py      # Temperature & heatmap endpoints
