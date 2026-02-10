@@ -17,12 +17,12 @@ ReLeaf is a smart urban planning tool designed to help cities and communities co
 
 ## Tech Stack
 
-**Frontend**: React + Vite + Deck.gl 
-**Backend**: Python (FastAPI)
-**Map Base**: Google Map Tiles API (3D)
-**Heat Data**: Sentinel-2 (GeoTIFF / LST)
-**AI Vision**: Google Gemini
-**Other Libraries**: rasterio, numpy, html2canvas
+* **Frontend**: React + Vite + Deck.gl 
+* **Backend**: Python (FastAPI)
+* **Map Base**: Google Map Tiles API (3D)
+* **Heat Data**: Sentinel-2 (GeoTIFF / LST)
+* **AI Vision**: Google Gemini
+* **Other Libraries**: rasterio, numpy, html2canvas
 
 ## Setup
 
